@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 竖屏手机优先:禁缩放、适配刘海屏 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#12141a">
+<title>勇者不休 · 像素挂机远征</title>
+<link rel="stylesheet" href="css/style.css?v=11">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <div id="hurt-fx"></div>
+  <div id="rotate-tip">📱 建议竖屏游玩体验更佳</div>
+
+  <!-- HUD:血条 / 资源 / 武器栏 / 按钮 -->
+  <div id="hud">
+    <div id="hud-top">
+      <div class="row">
+        <div id="hp-box"><div id="hp-fill"></div><div id="hp-text">100/100</div></div>
+      </div>
+      <div class="row">
+        <div class="chip">⚔攻击 <span id="atk-text">10</span></div>
+        <div class="chip"><span id="coin-slot"></span>金币 <b id="gold-text">0</b></div>
+        <div class="chip">💎材料 <span id="mat-text">0</span></div>
+        <div class="chip">☠击杀 <span id="kill-text">0</span></div>
+      </div>
+      <div id="stage-line">第1关 · ⚔ 0/21</div>
+      <div id="tip">拖动屏幕移动 · 武器全自动攻击 · 达标后挑战Boss通关</div>
+
+      <!-- Boss 大血条 -->
+      <div id="boss-bar" class="hidden">
+        <div id="boss-name">Boss</div>
+        <div id="boss-hp"><div id="boss-fill"></div></div>
+      </div>
+
+      <!-- 事件横幅 -->
+      <div id="event-banner"></div>
+    </div>
+
+    <!-- 已装备武器栏(左下,图标+等级) -->
+    <div id="weapon-bar"></div>
+
+    <div id="hud-bottom">
+      <button class="btn btn-sm" id="btn-sound">🔊</button>
+      <button class="btn btn-sm" id="btn-help">❓</button>
+      <button class="btn" id="btn-upgrade">强化</button>
+    </div>
+  </div>
+
+  <!-- 状态 & 强化面板(底部抽屉,不暂停游戏) -->
+  <div id="panel-mask" class="mask hidden">
+    <div class="sheet">
+      <h2>⚡ 强化工坊 <button class="btn x" id="btn-close">关闭</button></h2>
+      <div class="up-row">
+        <div class="t">🗡 全军攻击强化 <span id="pb-lv">Lv0</span></div>
+        <div class="d">攻击 +3(所有武器受益) · 当前攻击 <b id="pb-atk">10</b> → <b id="pb-next">13</b></div>
+        <button class="btn btn-buy" id="btn-wboost">强化 (金币 60)</button>
+      </div>
+      <div class="up-row">
+        <div class="t">🛡 防具强化 <span id="pa-lv">Lv1</span></div>
+        <div class="d">生命上限 <b id="pa-hp">100 → 125</b> ,强化后回满血</div>
+        <button class="btn btn-buy blue" id="btn-armor">强化 (💎 8)</button>
+      </div>
+      <div class="up-row tall">
+        <div class="t">⚔ 武器库 <span class="dim" id="w-count"></span></div>
+        <div id="stat-weapons" class="stat-list"></div>
+      </div>
+      <div class="up-row tall">
+        <div class="t">✨ 技能 & 强化点</div>
+        <div id="stat-skills" class="stat-list"></div>
+      </div>
+      <div class="up-row tall">
+        <div class="t">📊 生涯统计</div>
+        <div id="stat-stats" class="stat-list"></div>
+      </div>
+      <div class="up-row tall">
+        <div class="t">🏆 成就 <span class="dim" id="ach-count"></span></div>
+        <div id="stat-achievements" class="stat-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 离线收益弹窗 -->
+  <div id="offline-mask" class="mask hidden">
+    <div id="offline-box">
+      <div id="offline-title">🌙 欢迎回来!</div>
+      <div id="offline-text"></div>
+      <button class="btn btn-buy" id="btn-offline-claim" style="margin-top:14px">领取</button>
+    </div>
+  </div>
+
+  <!-- 宝箱三选一弹窗(暂停游戏) -->
+  <div id="chest-mask" class="mask hidden">
+    <div id="chest-box">
+      <div id="chest-title">🎁 打开宝箱!选择一项强化</div>
+      <div id="chest-cards"></div>
+      <div id="chest-hint">选择后立即生效并继续战斗</div>
+    </div>
+  </div>
+
+  <!-- 关卡通关结算 -->
+  <div id="stage-mask" class="mask hidden">
+    <div id="stage-clear-box">
+      <div id="stage-clear-text">✅ 通关!</div>
+    </div>
+  </div>
+
+  <!-- 帮助 -->
+  <div id="help-mask" class="mask hidden">
+    <div id="help-card">
+      <h3>📖 玩法说明(闯关模式)</h3>
+      · 每关击杀达标 → <b>Boss降临</b> → 击败Boss通关进入下一关<br>
+      · 关卡无限推进,每5张主题地图循环:<br>草原→雪原→沙漠→火山→深渊<br>
+      · 第2关起有随机<b>挑战词条</b>(风险↔收益),第5关起可能双词条<br>
+      · <b>精英怪</b>(金环+皇冠)血厚凶猛,必掉宝箱<br>
+      · 随机事件:<b>宝箱雨/金币雨/怪物狂暴/怪物狂潮</b><br>
+      · Boss会<b>冲锋/环形弹幕/召唤随从</b>,注意走位躲红弹<br>
+      · 死亡无惩罚原地复活,关卡进度保留;装备金币永续<br>
+      · <b>离线也在挂机</b>:关闭页面期间持续累积金币/材料(最多8小时),回来领取<br>
+      · 拾取宝箱三选一强化;金币/材料在工坊强化;<b>站桩越久:怪越快·你攻速越低</b>(记得走位)<br><br>
+      <h3>🔧 修改参数</h3>
+      编辑 <b>js/config.js</b>:怪物/武器/技能/Boss/词条/事件/宝箱/节奏 全在里面<br>
+      <button class="btn" id="btn-reset">🗑 重置存档(重新开始)</button>
+      <button class="btn" id="btn-help-close">知道了</button>
+    </div>
+  </div>
+
+  <!-- 死亡复活 -->
+  <div id="revive-mask" class="mask hidden">
+    <div class="big">💀 你倒下了</div>
+    <div class="cd" id="revive-text">3</div>
+    <div class="big" style="font-size:15px">原地复活中…</div>
+  </div>
+</div>
+
+<!-- 模块化加载(顺序即依赖顺序;?v= 为缓存版本号,改文件后记得 +1) -->
+<script src="js/config.js?v=11"></script>
+<script src="js/utils.js?v=11"></script>
+<script src="js/sprites.js?v=11"></script>
+<script src="js/audio.js?v=11"></script>
+<script src="js/world.js?v=11"></script>
+<script src="js/entities.js?v=11"></script>
+<script src="js/weapons.js?v=11"></script>
+<script src="js/loot.js?v=11"></script>
+<script src="js/levelup.js?v=11"></script>
+<script src="js/shop.js?v=11"></script>
+<script src="js/ui.js?v=11"></script>
+<script src="js/input.js?v=11"></script>
+<script src="js/main.js?v=11"></script>
+</body>
+</html>
