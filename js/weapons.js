@@ -183,6 +183,9 @@ function fireBoomerang(key, st, w){
 function updateProjectiles(dt){
   for (const p of projectiles){
     p.life -= dt;
+    /* ★ 窗口规则:弹体飞出屏幕(留60px余量)即失效——不向画面外射击;
+       回旋镖例外(去程可能短暂出屏,返程回到玩家手中) */
+    if (p.kind !== 'boomerang' && !inView(p.x, p.y, 60)){ p.dead = true; continue; }
     /* ★ 回旋镖:去程直线,半程后折返飞回玩家手中;命中不消失(往返双段) */
     if (p.kind === 'boomerang'){
       if (p.phase === 'out' && p.life <= p.maxLife / 2){
@@ -202,6 +205,7 @@ function updateProjectiles(dt){
         puffs.push({ x: p.x, y: p.y, vx: 0, vy: 0, t: 0.2, life: 0.2, color: '#aef5d0', size: 2.5 });
       for (const m of monsters){
         if (m.hp <= 0 || p.hitSet.has(m)) continue;
+        if (!inView(m.x, m.y, 30)) continue;         // ★ 屏幕外的敌人不被伤害
         if (Math.hypot(m.x - p.x, m.y - 10 - p.y) < m.type.radius + 9){
           p.hitSet.add(m);
           dealDamage(m, p.dmg, { color: '#aef5d0' });
@@ -209,8 +213,8 @@ function updateProjectiles(dt){
       }
       continue;                                      // 回旋镖不走下方通用命中逻辑
     }
-    /* 魔导弹持续追踪(目标死了就直线飞) */
-    if (p.kind === 'bolt' && p.target && p.target.hp > 0){
+    /* 魔导弹持续追踪(目标死亡或离开屏幕就直线飞,飞出屏幕即失效) */
+    if (p.kind === 'bolt' && p.target && p.target.hp > 0 && inView(p.target.x, p.target.y, 30)){
       const want = Math.atan2(p.target.y - 10 - p.y, p.target.x - p.x);
       const cur = Math.atan2(p.vy, p.vx);
       let diff = want - cur;
@@ -229,10 +233,10 @@ function updateProjectiles(dt){
     if (p.kind === 'fire' && Math.random() < 0.25 + (p.lv || 1) * 0.05)
       puffs.push({ x: p.x, y: p.y, vx: rand(-15,15), vy: rand(-15,15), t: 0.25, life: 0.25, color: '#ff9440', size: 3 });
 
-    /* 命中判定 */
+    /* 命中判定(★ 只命中屏幕内可见的敌人) */
     let hit = null;
     for (const m of monsters){
-      if (m.hp <= 0) continue;
+      if (m.hp <= 0 || !inView(m.x, m.y, 30)) continue;
       if (Math.hypot(m.x - p.x, m.y - 10 - p.y) < m.type.radius + 7){ hit = m; break; }
     }
     if (hit || p.life <= 0){
@@ -244,7 +248,7 @@ function updateProjectiles(dt){
           puffs.push({ x: p.x, y: p.y, vx: rand(-140, 140), vy: rand(-140, 140), t: 0.4, life: 0.4,
                        color: Math.random() < 0.5 ? '#ff9440' : '#ffd23e', size: rand(3, 5) });
         for (const m of monsters.slice()){
-          if (m.hp > 0 && dist(m, { x: p.x, y: p.y + 10 }) < p.aoe + m.type.radius)
+          if (m.hp > 0 && inView(m.x, m.y, 30) && dist(m, { x: p.x, y: p.y + 10 }) < p.aoe + m.type.radius)
             dealDamage(m, p.dmg, { color: '#ffb347' });
         }
         sfx('boom');

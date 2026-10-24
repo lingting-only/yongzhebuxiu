@@ -106,8 +106,8 @@ function huntMonAspdMul(){
   if (t <= 0) return 1;
   return 1 - Math.min(c.monAspdBoost, c.monAspdBoost * t / c.rampTime);
 }
-/* ★ 关卡血量成长:每深入一关,怪物基础血量 +18%(独立于玩家成长的难度曲线) */
-const stageHpMul = () => 1 + (G.stage - 1) * 0.18;
+/* ★ 关卡血量成长:统一走 config.js 的 stagePower('hp')(每关 +24%) */
+const stageHpMul = () => stagePower('hp');
 
 /* ═══════════ 刷怪(环形刷怪 + 关卡词条 + 精英怪) ═══════════ */
 function spawnMonster(forceElite){
@@ -126,8 +126,8 @@ function spawnMonster(forceElite){
     monsters.push({
       key, type, x, y, elite,
       hp: Math.round(type.hp * df * hpMul), maxHp: Math.round(type.hp * df * hpMul),
-      atk: Math.round(type.atk * (1 + (df - 1) * 0.8) * (elite ? ELITE.atkMul : 1) * modMul('atk')),
-      speed: type.speed * (elite ? ELITE.speedMul : 1) * modMul('speed'),
+      atk: Math.round(type.atk * (1 + (df - 1) * 0.8) * stagePower('atk') * (elite ? ELITE.atkMul : 1) * modMul('atk')),
+      speed: type.speed * stagePower('spd') * (elite ? ELITE.speedMul : 1) * modMul('speed'),
       atkCd: rand(0.3, 1), state: 'wander',
       wx: x, wy: y, waitT: rand(0, 2),
       flashT: 0, dir: Math.random() < 0.5 ? -1 : 1, walkT: 0, moving: false,
@@ -152,7 +152,8 @@ function spawnBoss(){
     bossDef: B, boss: true, x, y,
     df,                                 // ★ 记录 Boss 难度(供技能频率/弹幕量/移速随玩家成长放大)
     hp, maxHp: hp,
-    atk: Math.round(B.atk * (1 + (df - 1) * 0.6) * modMul('atk')),
+    atk: Math.round(B.atk * (1 + (df - 1) * 0.6) * stagePower('atk') * modMul('atk')),
+    speed: B.speed * stagePower('spd'),
     atkCd: 1, state: 'chase',
     skillCd: 3, skillIdx: 0, windupT: 0, dashT: 0,
     flashT: 0, dir: 1, walkT: 0, moving: true, waitT: 0, wx: x, wy: y,

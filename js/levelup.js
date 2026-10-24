@@ -16,7 +16,9 @@ function rollChoices(){
     const lv = player.skills[k] || 0;
     if (lv < SKILLS[k].max) pool.push({ w: 2.5, c: cardSkill(k) });
   }
-  for (const k in CHEST_BUFFS) pool.push({ w: 2, c: cardBuff(k) });
+  for (const k in CHEST_BUFFS){
+    if (!buffCapped(k)) pool.push({ w: 2, c: cardBuff(k) });   // ★ 叠满上限的属性点不再出现在卡池
+  }
 
   const picks = [];
   const used = new Set();
@@ -58,9 +60,23 @@ function cardBuff(k){
 
 /* ── 打开宝箱弹窗(暂停) ── */
 function openChestPanel(){
+  const choices = rollChoices();
+  /* ★ 全部强化满级(武器10级/技能满/属性点满)→ 卡池为空:
+       不弹窗不暂停,宝箱自动折算金币,游戏照常进行 */
+  if (!choices.length){
+    const gold = 150 + G.stage * 25;
+    player.gold += gold;
+    floaters.push({ x: player.x, y: player.y - 46, text: '已全满 · 宝箱折算金币 +' + gold,
+                    color: '#ffd24a', t: 1.3, life: 1.3, size: 15, vy: -38 });
+    for (let i = 0; i < 10; i++)
+      puffs.push({ x: player.x, y: player.y - 10, vx: rand(-100, 100), vy: rand(-150, -30),
+                   t: 0.5, life: 0.5, color: '#ffd24a', size: rand(2, 4) });
+    sfx('coin'); buzz(20); save(); refreshHUD();
+    return;
+  }
   const box = $('chest-cards');
   box.innerHTML = '';
-  for (const card of rollChoices()){
+  for (const card of choices){
     const el = document.createElement('button');
     el.className = 'chest-card';
     el.innerHTML = '<span class="cc-icon">' + card.icon + '</span>' +

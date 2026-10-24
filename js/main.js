@@ -46,6 +46,8 @@ function load(){
     if (d.b){ player.buffs.atk = +d.b.a || 1; player.buffs.aspd = +d.b.v || 1; player.buffs.hp = d.b.h | 0;
               player.buffs.spd = +d.b.p || 1; player.buffs.pickup = +d.b.q || 1; }
     player.hp = playerMaxHp();
+    clampBuffs();                       // ★ 旧存档超上限的属性点压回上限
+    player.hp = Math.min(player.hp, playerMaxHp());
     /* ★ 离线收益:超过 minSec 按"离线挂机"结算(封顶 capSec) */
     const elapsed = d.t ? (Date.now() - d.t) / 1000 : 0;
     if (elapsed >= CONFIG.offline.minSec){

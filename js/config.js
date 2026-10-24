@@ -121,14 +121,47 @@ const SKILLS = {
   thorns: { name:'荆棘',     icon:'🌵', max:3, type:'passive', desc:'受击时反弹攻击×0.6/级 伤害给周围敌人' },
 };
 
-/* ★ 宝箱三选一:属性强化点池(可重复获得,滚雪球) */
+/* ★ 宝箱三选一:属性强化点池 —— 全部有上限,叠满后不再出现在卡池中 */
 const CHEST_BUFFS = {
-  atk:    { icon:'💪', name:'力量', desc:'攻击力 +12%',        apply(){ player.buffs.atk    *= 1.12; } },
-  aspd:   { icon:'⚡', name:'急速', desc:'所有武器攻速 +10%',   apply(){ player.buffs.aspd   *= 0.90; } },
-  hp:     { icon:'❤️', name:'体魄', desc:'生命上限 +25 并回满', apply(){ player.buffs.hp += 25; player.hp = playerMaxHp(); } },
-  spd:    { icon:'👟', name:'疾风', desc:'移动速度 +8%',        apply(){ player.buffs.spd   *= 1.08; } },
-  pickup: { icon:'🧲', name:'寻宝', desc:'拾取范围 +30%',       apply(){ player.buffs.pickup*= 1.30; } },
+  atk:    { icon:'💪', name:'力量', desc:'攻击力 +12%(总上限×3)',   max:3,
+            apply(){ player.buffs.atk    = Math.min(3,   player.buffs.atk * 1.12); } },
+  aspd:   { icon:'⚡', name:'急速', desc:'攻速 +10%(总上限+67%)',  max:1.67,
+            apply(){ player.buffs.aspd   = Math.max(1 / 1.67, player.buffs.aspd * 0.90); } },
+  hp:     { icon:'❤️', name:'体魄', desc:'生命上限 +25 并回满(总上限+250)', max:250,
+            apply(){ player.buffs.hp = Math.min(250, player.buffs.hp + 25); player.hp = playerMaxHp(); } },
+  spd:    { icon:'👟', name:'疾风', desc:'移速 +8%(总上限×1.5)',   max:1.5,
+            apply(){ player.buffs.spd   = Math.min(1.5, player.buffs.spd * 1.08); } },
+  pickup: { icon:'🧲', name:'寻宝', desc:'拾取范围 +30%(总上限×3)', max:3,
+            apply(){ player.buffs.pickup= Math.min(3,   player.buffs.pickup * 1.30); } },
 };
+/* 属性点是否已叠满(满则不再进入三选一卡池) */
+function buffCapped(k){
+  const b = CHEST_BUFFS[k];
+  if (k === 'atk')    return player.buffs.atk    >= b.max;
+  if (k === 'aspd')   return player.buffs.aspd   <= 1 / b.max;
+  if (k === 'hp')     return player.buffs.hp     >= b.max;
+  if (k === 'spd')    return player.buffs.spd    >= b.max;
+  if (k === 'pickup') return player.buffs.pickup >= b.max;
+  return false;
+}
+/* 存档读取时把超出上限的旧数值压回上限 */
+function clampBuffs(){
+  player.buffs.atk    = Math.min(3, player.buffs.atk);
+  player.buffs.aspd   = Math.max(1 / 1.67, player.buffs.aspd);
+  player.buffs.hp     = Math.min(250, player.buffs.hp);
+  player.buffs.spd    = Math.min(1.5, player.buffs.spd);
+  player.buffs.pickup = Math.min(3, player.buffs.pickup);
+}
+
+/* ★ 关卡强度系数:每深入一关,敌人 攻击+8% / 血量+24% / 移速+1.2%(封顶+35%)——
+     叠加在玩家成长难度 difficulty() 之上,后期敌人整体全面变强 */
+function stagePower(kind){
+  const s = G.stage - 1;
+  if (kind === 'atk') return 1 + s * 0.08;
+  if (kind === 'hp')  return 1 + s * 0.24;
+  if (kind === 'spd') return Math.min(1.35, 1 + s * 0.012);
+  return 1;
+}
 
 /* ═════════════════════════════════════════════════════════
    ★ 闯关模式:5 张主题地图循环(每通关一张切下一张)
