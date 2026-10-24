@@ -81,6 +81,13 @@ function atkSlowMul(){
   if (t <= 0) return 1;
   return 1 + Math.min(c.atkSlow, c.atkSlow * t / c.rampTime);
 }
+/* ★ 站桩受伤惩罚:受到伤害的乘数(1=无惩罚,最大 1+dmgBoost),与围猎同步爬升 */
+function huntDmgMul(){
+  const c = CONFIG.idleHunt;
+  const t = player.stillT - c.delay;
+  if (t <= 0) return 1;
+  return 1 + Math.min(c.dmgBoost, c.dmgBoost * t / c.rampTime);
+}
 /* ★ 关卡血量成长:每深入一关,怪物基础血量 +18%(独立于玩家成长的难度曲线) */
 const stageHpMul = () => 1 + (G.stage - 1) * 0.18;
 
@@ -269,7 +276,7 @@ function dealDamage(m, baseDmg, opts){
 function hurtPlayer(dmg){
   if (player.dead || player.invT > 0) return;
   const guard = player.skills.guard || 0;
-  dmg = Math.max(1, Math.round(dmg * (1 - 0.12 * guard) * rand(0.9, 1.1)));
+  dmg = Math.max(1, Math.round(dmg * (1 - 0.12 * guard) * huntDmgMul() * rand(0.9, 1.1)));
   player.hp -= dmg; player.hurtT = 0.2; G.shakeT = 0.18;
   buzz(25);
   floaters.push({ x: player.x, y: player.y - 32, text: '-' + dmg, color: '#ff6a6a',
@@ -349,7 +356,7 @@ function updatePlayer(dt){
     player.huntWarned = false;
   } else if (player.stillT >= CONFIG.idleHunt.delay && !player.huntWarned && monsters.length){
     player.huntWarned = true;
-    floaters.push({ x: player.x, y: player.y - 56, text: '⚠ 站桩惩罚:怪加速·攻速降!',
+    floaters.push({ x: player.x, y: player.y - 56, text: '⚠ 站桩惩罚:怪加速·攻速降·受伤加重!',
                     color: '#ff8a5a', t: 1.4, life: 1.4, size: 14, vy: -20 });
     sfx('zap');
   }

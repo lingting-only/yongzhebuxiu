@@ -29,13 +29,14 @@ const CONFIG = {
   },
   pickup: { radius: 60, magnetSpeed: 400 },   // 拾取磁吸(宝箱"磁力"再加成)
 
-  /* ★ 站桩围猎:站着不动超过 delay 秒后双重惩罚 ——
-     追击怪移速提升 + 玩家攻速下降(迫使走位;移动立即恢复) */
+  /* ★ 站桩围猎:站着不动超过 delay 秒后三重惩罚 ——
+     追击怪移速提升 + 玩家攻速下降 + 玩家受伤加重(迫使走位;移动立即恢复) */
   idleHunt: {
-    delay: 3,       // 站桩多少秒后开始惩罚
-    maxBoost: 0.8,  // 怪物移速最多 +80%
-    atkSlow: 0.5,   // 玩家攻击间隔最多 +50%(≈攻速 -33%)
-    rampTime: 20,   // 从开始惩罚到满值经历多少秒(线性爬升)
+    delay: 2.5,     // 站桩多少秒后开始惩罚
+    maxBoost: 1.0,  // 怪物移速最多 +100%
+    atkSlow: 0.8,   // 玩家攻击间隔最多 +80%(≈攻速 -44%)
+    dmgBoost: 1.0,  // ★ 受到伤害最多 +100%(满值=怪物伤害×2,站桩会被围死)
+    rampTime: 15,   // 从开始惩罚到满值经历多少秒(线性爬升)
   },
 
   events: { minT: 40, maxT: 70 },   // ★ 随机事件间隔区间(秒)
@@ -56,10 +57,10 @@ const CONFIG = {
 /* ★ 怪物图鉴:hp/atk/speed/aggro 仇恨 / gold 金币区间 / matChance 材料率
      aggro 仇恨范围 ≥ 环形刷新半径上限(620),保证刷出的怪立即朝玩家走来 */
 const MONSTER_TYPES = {
-  slime: { name:'史莱姆', hp:30,  atk:6,  speed:72,  radius:12, aggro:660, atkRange:30, atkInterval:1.2, gold:[3,6],  matChance:0.28 },
-  bat:   { name:'蝙蝠',   hp:22,  atk:5,  speed:112, radius:10, aggro:700, atkRange:28, atkInterval:0.9, gold:[4,8],  matChance:0.30 },
-  mush:  { name:'毒蘑菇', hp:55,  atk:9,  speed:58,  radius:13, aggro:640, atkRange:30, atkInterval:1.4, gold:[5,10], matChance:0.42 },
-  skel:  { name:'骷髅兵', hp:95,  atk:13, speed:88,  radius:13, aggro:720, atkRange:32, atkInterval:1.0, gold:[8,15], matChance:0.55 },
+  slime: { name:'史莱姆', hp:30,  atk:8,  speed:72,  radius:12, aggro:660, atkRange:30, atkInterval:1.1, gold:[3,6],  matChance:0.28 },
+  bat:   { name:'蝙蝠',   hp:22,  atk:7,  speed:112, radius:10, aggro:700, atkRange:28, atkInterval:0.85, gold:[4,8],  matChance:0.30 },
+  mush:  { name:'毒蘑菇', hp:55,  atk:12, speed:58,  radius:13, aggro:640, atkRange:30, atkInterval:1.3, gold:[5,10], matChance:0.42 },
+  skel:  { name:'骷髅兵', hp:95,  atk:17, speed:88,  radius:13, aggro:720, atkRange:32, atkInterval:0.95, gold:[8,15], matChance:0.55 },
 };
 /* 出怪权重:关卡越深,强怪越多 */
 function monsterWeights(stage){

@@ -29,7 +29,7 @@ function killMonster(m){
     spawnDrop(m.x, m.y, 'gold', i === piles - 1 ? total - each * (piles - 1) : each);
   if (Math.random() < m.type.matChance * modMul('mat') || m.boss)
     spawnDrop(m.x, m.y, 'mat', m.boss ? 3 : 1);
-  if (Math.random() < 0.12) spawnDrop(m.x, m.y, 'heal', Math.round(playerMaxHp() * 0.3));
+  if (Math.random() < 0.06) spawnDrop(m.x, m.y, 'heal', Math.round(playerMaxHp() * 0.2));
   /* 宝箱:精英必掉 / Boss 掉2个 / 普通按动态概率+词条 */
   if (m.elite){ spawnDrop(m.x, m.y, 'chest', 1); G.killSinceChest = 0; }
   else if (m.boss){ spawnDrop(m.x, m.y, 'chest', 1); spawnDrop(m.x + 10, m.y, 'chest', 1); G.killSinceChest = 0; }
