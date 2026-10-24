@@ -21,6 +21,8 @@ const G = {
   /* 离线收益(load 时计算,领取后清零) */
   offlineGold: 0, offlineMat: 0, offlineSecs: 0,
 
+  playSec: 0,           // ★ 累计远征时长(秒,只统计实际游戏运行时间)
+
   /* 精英怪与随机事件 */
   eliteT: 24,           // 精英怪倒计时
   eventT: 45,           // 随机事件倒计时

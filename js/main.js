@@ -21,7 +21,7 @@ function save(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       g: player.gold, m: player.mat, k: player.kills, c: player.chests, d: player.deaths,
       wb: player.wboost, al: player.armorLv, stage: G.stage, bs: G.bestStage,
-      t: Date.now(),
+      t: Date.now(), ps: Math.round(G.playSec),
       w: Object.fromEntries(Object.entries(player.weapons).map(([k, s]) => [k, s.lv])),
       s: player.skills, a: player.achievements,
       b: { a: player.buffs.atk, v: player.buffs.aspd, h: player.buffs.hp, p: player.buffs.spd, q: player.buffs.pickup },
@@ -57,6 +57,7 @@ function load(){
       G.offlineMat  = Math.round(secs * rate / 8);
       G.offlineSecs = Math.round(secs);
     }
+    G.playSec = Math.max(0, d.ps | 0);                 // ★ 累计远征时长
   }catch(e){}
 }
 
@@ -132,6 +133,7 @@ function drawPlayer(){
 function update(dt){
   G.time += dt; G.shakeT -= dt;
   if (G.paused) return;                                  // 宝箱/工坊/帮助弹窗:世界暂停
+  G.playSec += dt;                                       // ★ 累计远征时长(只算实际游玩)
 
   updateStage(dt);                                       // ★ 关卡推进/精英/事件
   G.spawnT -= dt;
@@ -247,7 +249,8 @@ if (G.offlineGold > 0){
   const h = Math.floor(G.offlineSecs / 3600), m = Math.floor(G.offlineSecs % 3600 / 60);
   $('offline-text').innerHTML = '你离线挂机了 <b>' + (h ? h + ' 小时 ' : '') + m + ' 分钟</b><br>' +
     '获得 <span style="color:#ffd24a">' + coinIcon(13) + ' ' + fmtNum(G.offlineGold) +
-    '</span> + <span style="color:#7cc2ff">💎 ' + fmtNum(G.offlineMat) + '</span>';
+    '</span> + <span style="color:#7cc2ff">💎 ' + fmtNum(G.offlineMat) + '</span>' +
+    '<br><span style="font-size:13px;color:#9fd8ff">⏱ 累计远征 ' + fmtDur(G.playSec) + '</span>';
   $('offline-mask').classList.remove('hidden');
   syncPause();
 }

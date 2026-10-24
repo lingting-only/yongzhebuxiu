@@ -16,6 +16,16 @@ function weightedPick(weights){
   return Object.keys(weights)[0];
 }
 
+/* ★ 时长格式化:X天X小时 / X小时X分 / X分X秒 */
+function fmtDur(s){
+  s = Math.floor(s);
+  const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+  if (d) return d + '天' + h + '小时';
+  if (h) return h + '小时' + m + '分';
+  if (m) return m + '分' + (s % 60) + '秒';
+  return s + '秒';
+}
+
 /* 手机震动反馈(跟随静音开关;不支持的设备自动忽略) */
 function buzz(ms){
   if (G.muted || !navigator.vibrate) return;

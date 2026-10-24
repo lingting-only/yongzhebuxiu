@@ -5,9 +5,28 @@
 <!-- 竖屏手机优先:禁缩放、适配刘海屏 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="勇者不休">
 <meta name="theme-color" content="#12141a">
 <title>勇者不休 · 像素挂机远征</title>
-<link rel="stylesheet" href="css/style.css?v=18">
+
+<!-- ── 上线三件套:favicon / PWA / 分享预览 ── -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- 分享预览(微信/QQ/Twitter 等抓取的标题/描述/配图) -->
+<meta name="description" content="勇者不休 · 像素挂机远征——竖屏像素风挂机ARPG:7种武器全自动攻击、闯关无限推进、Boss战、宝箱三选一Build。手机电脑都能玩,可安装到主屏幕、支持离线游玩。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="勇者不休 · 像素挂机远征">
+<meta property="og:description" content="7种武器全自动攻击 · 闯关无限推进 · Boss战 · 宝箱三选一Build——竖屏像素风挂机ARPG,可安装可离线。">
+<meta property="og:image" content="og-image.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="勇者不休 · 像素挂机远征">
+<meta name="twitter:description" content="竖屏像素风挂机ARPG,7武器全自动战斗,闯关无限推进。">
+
+<link rel="stylesheet" href="css/style.css?v=19">
 </head>
 <body>
 <div id="wrap">
@@ -137,18 +156,26 @@
 </div>
 
 <!-- 模块化加载(顺序即依赖顺序;?v= 为缓存版本号,改文件后记得 +1) -->
-<script src="js/config.js?v=18"></script>
-<script src="js/utils.js?v=18"></script>
-<script src="js/sprites.js?v=18"></script>
-<script src="js/audio.js?v=18"></script>
-<script src="js/world.js?v=18"></script>
-<script src="js/entities.js?v=18"></script>
-<script src="js/weapons.js?v=18"></script>
-<script src="js/loot.js?v=18"></script>
-<script src="js/levelup.js?v=18"></script>
-<script src="js/shop.js?v=18"></script>
-<script src="js/ui.js?v=18"></script>
-<script src="js/input.js?v=18"></script>
-<script src="js/main.js?v=18"></script>
+<script src="js/config.js?v=19"></script>
+<script src="js/utils.js?v=19"></script>
+<script src="js/sprites.js?v=19"></script>
+<script src="js/audio.js?v=19"></script>
+<script src="js/world.js?v=19"></script>
+<script src="js/entities.js?v=19"></script>
+<script src="js/weapons.js?v=19"></script>
+<script src="js/loot.js?v=19"></script>
+<script src="js/levelup.js?v=19"></script>
+<script src="js/shop.js?v=19"></script>
+<script src="js/ui.js?v=19"></script>
+<script src="js/input.js?v=19"></script>
+<script src="js/main.js?v=19"></script>
+<!-- ★ PWA:注册 Service Worker(https/localhost 生效;file:// 直开自动忽略) -->
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
 </body>
 </html>

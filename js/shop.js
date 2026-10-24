@@ -97,6 +97,7 @@ function renderShopLists(){
       ['💀 死亡次数', fmtNum(player.deaths)],
       ['🏆 最高关卡', '第 ' + G.bestStage + ' 关'],
       ['🔥 估算 DPS', fmtNum(estimateDPS())],
+      ['⏱ 远征时长', fmtDur(G.playSec)],
       ['🪙 持有金币', fmtNum(player.gold)],
     ];
     st.innerHTML = rows.map(r => '<div class="stat-row"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>').join('');
