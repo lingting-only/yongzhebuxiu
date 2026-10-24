@@ -29,21 +29,23 @@ const CONFIG = {
   },
   pickup: { radius: 60, magnetSpeed: 400 },   // 拾取磁吸(宝箱"磁力"再加成)
 
-  /* ★ 站桩围猎:站着不动超过 delay 秒后三重惩罚 ——
-     追击怪移速提升 + 玩家攻速下降 + 玩家受伤加重(迫使走位;移动立即恢复) */
+  /* ★ 站桩围猎:站着不动超过 delay 秒后多重惩罚 ——
+     小怪移速/攻击力/攻速全面提升 + 玩家攻速下降 + 受伤加重(迫使走位;移动立即恢复) */
   idleHunt: {
-    delay: 2.5,     // 站桩多少秒后开始惩罚
-    maxBoost: 1.0,  // 怪物移速最多 +100%
-    atkSlow: 0.8,   // 玩家攻击间隔最多 +80%(≈攻速 -44%)
-    dmgBoost: 1.0,  // ★ 受到伤害最多 +100%(满值=怪物伤害×2,站桩会被围死)
-    rampTime: 15,   // 从开始惩罚到满值经历多少秒(线性爬升)
+    delay: 2.5,         // 站桩多少秒后开始惩罚
+    maxBoost: 1.0,      // 怪物移速最多 +100%
+    monAtkBoost: 0.5,   // ★ 小怪攻击力最多 +50%
+    monAspdBoost: 0.3,  // ★ 小怪攻击间隔最多 -30%(≈攻速 +43%)
+    atkSlow: 0.8,       // 玩家攻击间隔最多 +80%(≈攻速 -44%)
+    dmgBoost: 1.0,      // ★ 玩家受到伤害最多 +100%(与小怪攻击加成叠乘,满惩罚≈4倍承伤)
+    rampTime: 15,       // 从开始惩罚到满值经历多少秒(线性爬升)
   },
 
   events: { minT: 40, maxT: 70 },   // ★ 随机事件间隔区间(秒)
 
   /* ★ 离线收益:关闭页面期间也在"挂机",回来按时长结算
-       金币速率 = base + 关卡×perStage;材料 = 金币的 1/8;封顶 capSec 秒 */
-  offline: { minSec: 120, capSec: 8 * 3600, base: 3, perStage: 1.5 },
+       金币速率 = base + 关卡×perStage;材料 = 金币的 1/8;封顶 capSec 秒(奖励已下调) */
+  offline: { minSec: 120, capSec: 4 * 3600, base: 1.5, perStage: 0.75 },
   upgrade: {
     wboostBaseCost: 60,         // ★ 全军攻击强化(金币)基础消耗
     wboostCostGrow: 1.52,       //   ★ 越往后越贵(指数增长,后期升级明显变难)
@@ -150,7 +152,7 @@ const THEMES = [
 ];
 const stageTheme = () => THEMES[(G.stage - 1) % THEMES.length];
 
-/* ★ Boss 图鉴(数值为第 1 关基准,随关卡与玩家成长放大) */
+/* ★ Boss 图鉴(数值为第 1 关基准;玩家总等级每 +1,Boss 血/攻按普通怪 3 倍速度放大,见 entities.js 的 bossDifficulty) */
 const BOSSES = {
   slimeking:    { name:'史莱姆之王', sprite:'slime', scale:2.6, hp:900,  atk:18, speed:55, radius:30, atkRange:46, atkInterval:1.6, gold:[60,90],  skills:['summon'] },
   batking:      { name:'冰霜蝠王',   sprite:'bat',   scale:2.4, hp:780,  atk:15, speed:95, radius:26, atkRange:42, atkInterval:1.2, gold:[55,85],  skills:['barrage','dash'] },

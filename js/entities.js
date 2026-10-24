@@ -61,12 +61,16 @@ function weaponDamage(key, st){
    ① 玩家成长:武器+技能总等级越多,新刷的怪越强(×0.04/级)
    ② 关卡深度:每关攻击 +0.20/关(血量另享 stageHpMul 的 +18%/关)
    ③ 站桩围猎:站着不动怪加速+自身攻速下降 */
-function difficulty(){
+function playerTotalLv(){
   let total = player.armorLv - 1 + player.wboost;
   for (const k in player.weapons) total += player.weapons[k].lv;
   for (const k in player.skills)  total += player.skills[k];
-  return 1 + total * 0.04 + (G.stage - 1) * 0.20;
+  return total;
 }
+function difficulty(){ return 1 + playerTotalLv() * 0.04 + (G.stage - 1) * 0.20; }
+/* ★ Boss 专属成长:玩家每级总等级对 Boss 的放大是普通怪的 3 倍(0.12/级 vs 0.04/级)
+     → 玩家越强,Boss 血量/攻击/移速/技能频率全面同步变强 */
+function bossDifficulty(){ return 1 + playerTotalLv() * 0.12 + (G.stage - 1) * 0.20; }
 const monsterCap = () => CONFIG.maxMonsters + modMul('cap');   // 蜂群词条加怪位
 function huntBoost(){
   const c = CONFIG.idleHunt;
@@ -87,6 +91,20 @@ function huntDmgMul(){
   const t = player.stillT - c.delay;
   if (t <= 0) return 1;
   return 1 + Math.min(c.dmgBoost, c.dmgBoost * t / c.rampTime);
+}
+/* ★ 站桩小怪强化:攻击力乘数(最大 1+monAtkBoost),与围猎同步爬升(只作用于普通小怪) */
+function huntMonAtkMul(){
+  const c = CONFIG.idleHunt;
+  const t = player.stillT - c.delay;
+  if (t <= 0) return 1;
+  return 1 + Math.min(c.monAtkBoost, c.monAtkBoost * t / c.rampTime);
+}
+/* ★ 站桩小怪攻速:攻击间隔乘数(最小 1-monAspdBoost → 打得更快),与围猎同步爬升(只作用于普通小怪) */
+function huntMonAspdMul(){
+  const c = CONFIG.idleHunt;
+  const t = player.stillT - c.delay;
+  if (t <= 0) return 1;
+  return 1 - Math.min(c.monAspdBoost, c.monAspdBoost * t / c.rampTime);
 }
 /* ★ 关卡血量成长:每深入一关,怪物基础血量 +18%(独立于玩家成长的难度曲线) */
 const stageHpMul = () => 1 + (G.stage - 1) * 0.18;
@@ -124,7 +142,7 @@ function spawnMonster(forceElite){
 function spawnBoss(){
   const theme = stageTheme();
   const B = BOSSES[theme.boss];
-  const df = difficulty();
+  const df = bossDifficulty();                        // ★ 玩家越强 Boss 越强(专属成长曲线)
   const a = Math.random() * Math.PI * 2, r = 420;
   const x = clamp(player.x + Math.cos(a) * r, CONFIG.wall + 80, CONFIG.mapW - CONFIG.wall - 80);
   const y = clamp(player.y + Math.sin(a) * r, CONFIG.wall + 80, CONFIG.mapH - CONFIG.wall - 80);
@@ -132,6 +150,7 @@ function spawnBoss(){
   G.boss = {
     key: B.sprite, type: { name: B.name, radius: B.radius, aggro: 1e9, atkRange: B.atkRange, atkInterval: B.atkInterval, gold: B.gold, matChance: 1, speed: B.speed, hp: B.hp, atk: B.atk },
     bossDef: B, boss: true, x, y,
+    df,                                 // ★ 记录 Boss 难度(供技能频率/弹幕量/移速随玩家成长放大)
     hp, maxHp: hp,
     atk: Math.round(B.atk * (1 + (df - 1) * 0.6) * modMul('atk')),
     atkCd: 1, state: 'chase',
@@ -356,7 +375,7 @@ function updatePlayer(dt){
     player.huntWarned = false;
   } else if (player.stillT >= CONFIG.idleHunt.delay && !player.huntWarned && monsters.length){
     player.huntWarned = true;
-    floaters.push({ x: player.x, y: player.y - 56, text: '⚠ 站桩惩罚:怪加速·攻速降·受伤加重!',
+    floaters.push({ x: player.x, y: player.y - 56, text: '⚠ 站桩惩罚:怪加速变强·你攻速降·受伤加重!',
                     color: '#ff8a5a', t: 1.4, life: 1.4, size: 14, vy: -20 });
     sfx('zap');
   }
@@ -388,7 +407,8 @@ function updateMonster(m, dt){
   for (const k in m.cds) m.cds[k] -= dt;
   const d = dist(m, player);
   const rage = G.rageT > 0 ? 1.4 : 1;                 // 狂暴事件:移速+40%
-  const speed = (m.speed || m.type.speed) * rage * (m.boss ? 1 : 1 + huntBoost());
+  const speed = (m.speed || m.type.speed) * rage *
+                (m.boss ? Math.min(1.35, 1 + ((m.df || 1) - 1) * 0.03) : 1 + huntBoost());
 
   if (m.boss){
     /* ★ Boss:永远追击 + 周期技能(冲锋/弹幕/召唤) */
@@ -406,10 +426,10 @@ function updateMonster(m, dt){
     if (d > m.type.atkRange + CONFIG.player.radius + m.type.radius){
       moveEntity(m, player.x, player.y, speed, dt); m.moving = true;
     } else if (m.atkCd <= 0){
-      m.atkCd = m.type.atkInterval;
+      m.atkCd = m.type.atkInterval * huntMonAspdMul();               // ★ 站桩围猎:小怪攻速加快
       slashes.push({ x:(m.x+player.x)/2, y:(m.y+player.y)/2-10,
                      a: Math.atan2(player.y-m.y, player.x-m.x), t:0.18, max:0.18, color:'#ff6a5a' });
-      hurtPlayer(m.atk * (G.rageT > 0 ? 1.2 : 1));
+      hurtPlayer(m.atk * huntMonAtkMul() * (G.rageT > 0 ? 1.2 : 1)); // ★ 站桩围猎:小怪攻击提升
     }
   } else {
     m.waitT -= dt;
@@ -441,12 +461,13 @@ function bossAI(m, dt, d, speed){
   if (m.skillCd <= 0){
     const skill = m.bossDef.skills[m.skillIdx % m.bossDef.skills.length];
     m.skillIdx++;
-    m.skillCd = rand(3.2, 4.5);
+    /* ★ 技能冷却随玩家成长缩短(最多缩至 55%,Boss 放技能越来越频繁) */
+    m.skillCd = rand(3.2, 4.5) * Math.max(0.55, 1 / (1 + ((m.df || 1) - 1) * 0.08));
     if (skill === 'dash'){
       m.windupT = 0.45;
       floaters.push({ x: m.x, y: m.y - 70, text: '冲锋!', color: '#ff5d5d', t: 0.8, life: 0.8, size: 15, vy: -30 });
     } else if (skill === 'barrage'){
-      const n = 12, sp = 175;
+      const n = Math.min(24, 12 + Math.floor(((m.df || 1) - 1) * 1.5)), sp = 175;   // ★ 弹幕数量随玩家成长增加
       for (let i = 0; i < n; i++){
         const a = i / n * Math.PI * 2 + rand(-0.1, 0.1);
         eorbs.push({ x: m.x, y: m.y - 20, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
@@ -456,7 +477,7 @@ function bossAI(m, dt, d, speed){
     } else if (skill === 'summon'){
       for (let i = 0; i < 3; i++){
         const key = weightedPick(monsterWeights(G.stage));
-        const type = MONSTER_TYPES[key], df = difficulty();
+        const type = MONSTER_TYPES[key], df = bossDifficulty();   // ★ 召唤随从也随玩家成长变强
         monsters.push({ key, type, summon: true,
           x: clamp(m.x + rand(-70, 70), 60, CONFIG.mapW - 60),
           y: clamp(m.y + rand(-70, 70), 60, CONFIG.mapH - 60),
