@@ -22,10 +22,14 @@ function buzz(ms){
   try{ navigator.vibrate(ms); }catch(e){}
 }
 
-/* ★ 大数字缩写:≥1万 显示 x.x万,≥1亿 显示 x.x亿(防止资源行溢出屏幕) */
+/* ★ 大数字缩写:<1万 原样;<1000万 一位小数;≥1000万 取整(4位数,保证均分格内完整显示);
+     万位进位到亿(99999999 → 1亿) */
 function fmtNum(n){
   n = Math.floor(n);
+  if (n < 1e4) return '' + n;
+  const w = Math.round(n / 1e4);
+  if (w >= 10000) return (w / 10000).toFixed(w % 10000 ? 1 : 0).replace(/\.0$/, '') + '亿';
   if (n >= 1e8) return (n / 1e8).toFixed(n % 1e8 ? 1 : 0).replace(/\.0$/, '') + '亿';
-  if (n >= 1e4) return (n / 1e4).toFixed(n % 1e4 ? 1 : 0).replace(/\.0$/, '') + '万';
-  return '' + n;
+  if (w >= 1000) return w + '万';
+  return (n / 1e4).toFixed(n % 1e4 ? 1 : 0).replace(/\.0$/, '') + '万';
 }

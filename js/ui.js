@@ -12,10 +12,12 @@ function refreshHUD(){
   $('mat-text').textContent = fmtNum(player.mat);
   $('kill-text').textContent = fmtNum(player.kills);
 
-  /* 关卡信息独立细条(不占资源行) + Boss 血条 */
-  $('stage-line').textContent = '第' + G.stage + '关·' + stageTheme().name +
-    (G.mods.length ? ' [' + G.mods.map(m => m.name).join('·') + ']' : '') + ' · ' +
-    (G.bossSpawned ? (G.boss ? '👑 BOSS战' : '通关中…') : '击杀 ' + G.stageKills + '/' + stageQuota(G.stage));
+  /* 关卡行:左侧 关卡+主题+词条(超长省略),右侧 击杀进度(固定显示永不截断) */
+  $('stage-info').textContent = '第' + G.stage + '关·' + stageTheme().name +
+    (G.mods.length ? ' [' + G.mods.map(m => m.name).join('·') + ']' : '');
+  $('stage-kill').textContent = G.bossSpawned
+    ? (G.boss ? '👑 BOSS战' : '通关中…')
+    : '击杀 ' + G.stageKills + '/' + stageQuota(G.stage);
   const bb = $('boss-bar');
   if (G.boss && G.boss.hp > 0){
     bb.classList.remove('hidden');

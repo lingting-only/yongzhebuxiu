@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#12141a">
 <title>勇者不休 · 像素挂机远征</title>
-<link rel="stylesheet" href="css/style.css?v=14">
+<link rel="stylesheet" href="css/style.css?v=18">
 </head>
 <body>
 <div id="wrap">
@@ -21,13 +21,13 @@
       <div class="row">
         <div id="hp-box"><div id="hp-fill"></div><div id="hp-text">100/100</div></div>
       </div>
-      <div class="row">
-        <div class="chip">⚔攻击 <span id="atk-text">10</span></div>
-        <div class="chip"><span id="coin-slot"></span>金币 <b id="gold-text">0</b></div>
-        <div class="chip">💎材料 <span id="mat-text">0</span></div>
-        <div class="chip">☠击杀 <span id="kill-text">0</span></div>
+      <div class="row eq">
+        <div class="chip"><span class="cv">⚔攻击 <span id="atk-text">10</span></span></div>
+        <div class="chip"><span class="cv"><span id="coin-slot"></span>金币 <b id="gold-text">0</b></span></div>
+        <div class="chip"><span class="cv">💎材料 <span id="mat-text">0</span></span></div>
+        <div class="chip"><span class="cv">☠击杀 <span id="kill-text">0</span></span></div>
       </div>
-      <div id="stage-line">第1关 · ⚔ 0/21</div>
+      <div id="stage-line"><span id="stage-info">第1关</span><b id="stage-kill">击杀 0/21</b></div>
       <div id="tip">拖动屏幕移动 · 武器全自动攻击 · 达标后挑战Boss通关</div>
 
       <!-- Boss 大血条 -->
@@ -137,18 +137,18 @@
 </div>
 
 <!-- 模块化加载(顺序即依赖顺序;?v= 为缓存版本号,改文件后记得 +1) -->
-<script src="js/config.js?v=14"></script>
-<script src="js/utils.js?v=14"></script>
-<script src="js/sprites.js?v=14"></script>
-<script src="js/audio.js?v=14"></script>
-<script src="js/world.js?v=14"></script>
-<script src="js/entities.js?v=14"></script>
-<script src="js/weapons.js?v=14"></script>
-<script src="js/loot.js?v=14"></script>
-<script src="js/levelup.js?v=14"></script>
-<script src="js/shop.js?v=14"></script>
-<script src="js/ui.js?v=14"></script>
-<script src="js/input.js?v=14"></script>
-<script src="js/main.js?v=14"></script>
+<script src="js/config.js?v=18"></script>
+<script src="js/utils.js?v=18"></script>
+<script src="js/sprites.js?v=18"></script>
+<script src="js/audio.js?v=18"></script>
+<script src="js/world.js?v=18"></script>
+<script src="js/entities.js?v=18"></script>
+<script src="js/weapons.js?v=18"></script>
+<script src="js/loot.js?v=18"></script>
+<script src="js/levelup.js?v=18"></script>
+<script src="js/shop.js?v=18"></script>
+<script src="js/ui.js?v=18"></script>
+<script src="js/input.js?v=18"></script>
+<script src="js/main.js?v=18"></script>
 </body>
 </html>

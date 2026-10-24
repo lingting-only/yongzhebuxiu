@@ -22,14 +22,21 @@ html,body{
 
 /* ───────── HUD ───────── */
 #hud{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column}
-#hud-top{padding:calc(8px + env(safe-area-inset-top)) 10px 0;display:flex;flex-direction:column;gap:6px}
-/* 资源行:固定单行不换行(关卡信息已移到独立的 #stage-line) */
-.row{display:flex;gap:6px;align-items:center}
+#hud-top{padding:calc(8px + env(safe-area-inset-top)) 8px 0;display:flex;flex-direction:column;gap:6px}
+/* 资源行:固定单行不换行(字号/间距收紧,4 个标签在大数值下也放得下) */
+.row{display:flex;gap:5px;align-items:center}
+/* ★ 均分行(eq):四等分自适应宽度,内容居中,超长在格内省略 */
+.row.eq .chip{flex:1 1 0;min-width:0;text-align:center;font-size:11px;padding:3px 4px;overflow:hidden}
+.row.eq .cv{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+@media (max-width: 359px){ .chip{font-size:11px;padding:2px 5px} }   /* 窄屏兜底再缩一档 */
 
-/* 关卡信息细条(居中单行,超长省略) */
+/* 关卡信息细条:左=关卡/主题/词条(可收缩省略),右=击杀进度(固定不截断) */
 #stage-line{align-self:center;margin-top:6px;background:rgba(0,0,0,.45);border-radius:10px;
   padding:3px 12px;font-size:12px;font-weight:700;color:#9fd8ff;text-shadow:0 1px 2px #000;
-  white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  white-space:nowrap;max-width:calc(100% - 8px);display:flex;justify-content:space-between;
+  align-items:center;gap:10px;overflow:hidden}
+#stage-info{overflow:hidden;text-overflow:ellipsis;min-width:0}
+#stage-kill{flex-shrink:0;color:#ffd24a}
 #hp-box{flex:1;height:20px;border-radius:10px;background:rgba(0,0,0,.55);
   border:2px solid rgba(255,255,255,.25);position:relative;overflow:hidden}
 #hp-fill{height:100%;width:100%;border-radius:8px;background:linear-gradient(#7de87d,#2f9e3f);transition:width .15s}
@@ -37,7 +44,7 @@ html,body{
 #hp-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
 .chip{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.18);border-radius:8px;
-  padding:3px 8px;font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap}
+  padding:2px 6px;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap}
 .chip b{color:#ffd24a}
 .pix-ic{image-rendering:pixelated;image-rendering:crisp-edges;vertical-align:-2px}
 #tip{align-self:center;margin-top:8px;background:rgba(0,0,0,.6);border-radius:14px;
