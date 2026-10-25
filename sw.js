@@ -3,7 +3,7 @@
    全部失败回退到缓存的 index.html → 断网也能玩。
    部署新版本时改 CACHE 版本号即可让老客户端刷新缓存。 */
 'use strict';
-const CACHE = 'yzbx-v2';
+const CACHE = 'yzbx-v4';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './favicon.png', './icon-192.png', './icon-512.png',

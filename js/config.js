@@ -12,8 +12,8 @@ const CONFIG = {
        掉率 = chance / (1 + kills/chanceDecay),下限 chanceMin
        保底 = pity + 每 pityStep 杀 +pityGrow,上限 pityMax */
   chest: {
-    chance: 0.08, chanceMin: 0.02, chanceDecay: 400,
-    pity: 15, pityStep: 150, pityGrow: 10, pityMax: 60,
+    chance: 0.05, chanceMin: 0.012, chanceDecay: 250,
+    pity: 22, pityStep: 120, pityGrow: 12, pityMax: 90,
   },
 
   player: {
@@ -41,7 +41,7 @@ const CONFIG = {
     rampTime: 15,       // 从开始惩罚到满值经历多少秒(线性爬升)
   },
 
-  events: { minT: 40, maxT: 70 },   // ★ 随机事件间隔区间(秒)
+  events: { minT: 55, maxT: 90 },   // ★ 随机事件间隔区间(秒)
 
   /* ★ 离线收益:关闭页面期间也在"挂机",回来按时长结算
        金币速率 = base + 关卡×perStage;材料 = 金币的 1/8;封顶 capSec 秒(奖励已下调) */
@@ -153,12 +153,12 @@ function clampBuffs(){
   player.buffs.pickup = Math.min(3, player.buffs.pickup);
 }
 
-/* ★ 关卡强度系数:每深入一关,敌人 攻击+8% / 血量+24% / 移速+1.2%(封顶+35%)——
+/* ★ 关卡强度系数:每深入一关,敌人 攻击+10% / 血量+28% / 移速+1.2%(封顶+35%)——
      叠加在玩家成长难度 difficulty() 之上,后期敌人整体全面变强 */
 function stagePower(kind){
   const s = G.stage - 1;
-  if (kind === 'atk') return 1 + s * 0.08;
-  if (kind === 'hp')  return 1 + s * 0.24;
+  if (kind === 'atk') return 1 + s * 0.10;
+  if (kind === 'hp')  return 1 + s * 0.28;
   if (kind === 'spd') return Math.min(1.35, 1 + s * 0.012);
   return 1;
 }
@@ -194,10 +194,10 @@ const BOSSES = {
   shadowdragon: { name:'暗影魔龙',   sprite:'bat',   scale:3.0, hp:1400, atk:28, speed:80, radius:32, atkRange:48, atkInterval:1.4, gold:[90,130], skills:['dash','barrage','summon'] },
 };
 
-/* ★ 精英怪 */
-const ELITE = { interval: 24, hpMul: 4, atkMul: 1.6, speedMul: 1.1, scale: 1.45, goldMul: 3 };
+/* ★ 精英怪:更稀有但更强 */
+const ELITE = { interval: 45, hpMul: 5, atkMul: 1.8, speedMul: 1.1, scale: 1.45, goldMul: 3 };
 
-/* ★ 随机事件(每隔 40~70 秒触发一个) */
+/* ★ 随机事件(每隔 55~90 秒触发一个) */
 const EVENTS = [
   { key:'chestrain', name:'🎁 天降宝箱!' },
   { key:'goldrain',  name:'💰 金币雨!' },

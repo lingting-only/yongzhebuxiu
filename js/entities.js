@@ -254,8 +254,8 @@ function checkAchievements(){
 function runRandomEvent(){
   const ev = EVENTS[randInt(0, EVENTS.length - 1)];
   showEventBanner(ev.name);
-  if (ev.key === 'chestrain'){                        // 宝箱雨
-    for (let i = 0; i < 6; i++){
+  if (ev.key === 'chestrain'){                        // 宝箱雨(3个,降获取频率)
+    for (let i = 0; i < 3; i++){
       const a = Math.random() * Math.PI * 2, r = rand(60, 170);
       spawnDrop(clamp(player.x + Math.cos(a) * r, 60, CONFIG.mapW - 60),
                 clamp(player.y + Math.sin(a) * r, 60, CONFIG.mapH - 60), 'chest', 1);

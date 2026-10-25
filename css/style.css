@@ -123,6 +123,7 @@ html,body{
   background:linear-gradient(160deg,#ffd75e,#f0a020);color:#5a3a00}
 .btn-buy:disabled{background:#3a3f4a;color:#778;box-shadow:none;cursor:not-allowed;transform:none}
 .btn-buy.blue{background:linear-gradient(160deg,#7cb8ff,#3f7fe0);color:#0a2a5a}
+.btn-buy.blue:disabled{background:#3a3f4a;color:#778;box-shadow:none;cursor:not-allowed;transform:none}
 .stat-list{font-size:13px}
 .stat-row{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px dashed #333a46;color:#cfd5e0}
 .stat-row span:last-child{color:#ffd24a}

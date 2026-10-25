@@ -30,9 +30,9 @@ function killMonster(m){
   if (Math.random() < m.type.matChance * modMul('mat') || m.boss)
     spawnDrop(m.x, m.y, 'mat', m.boss ? 3 : 1);
   if (Math.random() < 0.06) spawnDrop(m.x, m.y, 'heal', Math.round(playerMaxHp() * 0.2));
-  /* 宝箱:精英必掉 / Boss 掉2个 / 普通按动态概率+词条 */
+  /* 宝箱:精英必掉 / Boss 掉1个 / 普通按动态概率+词条(整体降获取频率) */
   if (m.elite){ spawnDrop(m.x, m.y, 'chest', 1); G.killSinceChest = 0; }
-  else if (m.boss){ spawnDrop(m.x, m.y, 'chest', 1); spawnDrop(m.x + 10, m.y, 'chest', 1); G.killSinceChest = 0; }
+  else if (m.boss){ spawnDrop(m.x, m.y, 'chest', 1); G.killSinceChest = 0; }
   else if (Math.random() < chestChance() * modMul('chest') || G.killSinceChest >= chestPity()){
     G.killSinceChest = 0;
     spawnDrop(m.x, m.y, 'chest', 1);
